@@ -1,13 +1,16 @@
 
 # Compilador &mdash; Trabalho Laborational
 
-## Mini-compilador para um subconjunto da linguagem C
+## Compilador para a Linguagem C0 
 
-## Fases
+Prentende-se que implementem um compilador básico da *linguagem C0*,
+um dialeto da linguagem C para ensino desenvolvido em CMU.  O
+compilador deverá ler código fonte C0 e gerar linguagem *assembly*
+MIPS.
 
-1. Análise lexical e sintática
-2. Geração de código
+Consultar a [documentação](docs/trabalho.pdf) para mais informação.
 
-## Documentos
+---
 
-[C0 Reference](docs/c0-reference.pdf)
+Pedro Vasconcelos, 2020.
+
