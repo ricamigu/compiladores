@@ -9,19 +9,34 @@ import Lexer
 
 %token
 
+int                       { TOK_INT }
 num                       { TOK_NUM $$ }
 if                        { TOK_IF }
 then                      { TOK_THEN }
 else                      { TOK_ELSE }
 return                    { TOK_RETURN }
 while                     { TOK_WHILE }
+bool                      { TOK_BOOLEAN }
 '+'                       { TOK_PLUS }
 '-'                       { TOK_MINUS }
 '*'                       { TOK_MULT }
 '/'                       { TOK_DIV }
+','                       { TOK_COMMA }
+';'                       { TOK_SEMICOLON }
+'.'                       { TOK_DOT }
 '('                       { TOK_LPAREN }
 ')'                       { TOK_RPAREN }
+'{'                       { TOK_LBRACE }
+'}'                       { TOK_RBRACE }
+'%'                       { TOK_MOD } 
+'=='                      { TOK_EQUALS_EQUALS } 
+'='                       { TOK_EQUALS }  
+'<='                      { TOK_LESS_OR_EQUAL } 
+'>='                      { TOK_GREATER_OR_EQUAL }  
+'<'                       { TOK_LESS_THAN }  
+'>'                       { TOK_GREATER_THAN } 
 
+%nonassoc '<=' '>='  '<' '>' '=='
 %left '+' '-'
 %left '*' '/'
 

@@ -17,7 +17,7 @@ then                      { \s -> TOK_THEN }
 else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
-bool                      { \s -> TOK_BOOLS } -- testar
+bool                      { \s -> TOK_BOOLEAN } -- testar
 true                      { \s -> TOK_BOOL s }
 false                     { \s -> TOK_BOOL s }
 $digit+                   { \s -> TOK_NUM (read s) }
@@ -46,7 +46,7 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 $quote                    { \s -> TOK_DOUBLE_QUOTES}
 {
 data Token = TOK_NUM Int
-           | TOK_BOOLS
+           | TOK_BOOLEAN
            | TOK_BOOL String
            | TOK_STRING String
            | TOK_ID String
