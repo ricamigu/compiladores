@@ -32,6 +32,7 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 "{"                       { \s -> TOK_LBRACE }
 "}"                       { \s -> TOK_RBRACE }
 
+
 {
 data Token = TOK_NUM Int
            | TOK_BOOL String
