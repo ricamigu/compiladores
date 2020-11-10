@@ -36,13 +36,13 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 "{"                       { \s -> TOK_LBRACE }
 "}"                       { \s -> TOK_RBRACE }
 "%"                       { \s -> TOK_MOD }
+"!="                      { \s -> TOK_NOT_EQUAL }
 "=="                      { \s -> TOK_EQUALS_EQUALS }
 "="                       { \s -> TOK_EQUALS }
 "<="                      { \s -> TOK_LESS_OR_EQUAL }
 ">="                      { \s -> TOK_GREATER_OR_EQUAL }
 "<"                       { \s -> TOK_LESS_THAN }
 ">"                       { \s -> TOK_GREATER_THAN }
---$quote($white)*.*(white)*.*$quote  { \s -> TOK_STRING s }
 $quote                    { \s -> TOK_DOUBLE_QUOTES}
 {
 data Token = TOK_NUM Int
@@ -60,6 +60,7 @@ data Token = TOK_NUM Int
            | TOK_MINUS
            | TOK_MULT
            | TOK_DIV
+           | TOK_NOT_EQUAL
            | TOK_COMMA
            | TOK_DOT
            | TOK_SEMICOLON

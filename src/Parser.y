@@ -30,7 +30,8 @@ False                     { TOK_BOOL $$ }
 ')'                       { TOK_RPAREN }
 '{'                       { TOK_LBRACE }
 '}'                       { TOK_RBRACE }
-'%'                       { TOK_MOD } 
+'%'                       { TOK_MOD }
+'!='                      { TOK_NOT_EQUAL }
 '=='                      { TOK_EQUALS_EQUALS } 
 '='                       { TOK_EQUALS }  
 '<='                      { TOK_LESS_OR_EQUAL } 
@@ -54,12 +55,14 @@ Exp : num { Num $1 }
     | Exp '-' Exp { Minus $1 $3 }
     | Exp '*' Exp { Mult $1 $3 }
     | Exp '/' Exp { Div $1 $3 }
+    | Exp '%' Exp { Mod $1 $3 }
     | Exp '<=' Exp { Less_Equal $1 $3 }
     | Exp '>=' Exp { Greater_Equal $1 $3 }
     | Exp '<' Exp { Less_Than $1 $3 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
     | Exp '=' Exp { Equals $1 $3 }
+    | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
 
 {
@@ -73,12 +76,14 @@ data Exp = Num Int
          | Minus Exp Exp
          | Mult Exp Exp
          | Div Exp Exp
+         | Mod Exp Exp
          | Less_Equal Exp Exp
          | Greater_Equal Exp Exp
          | Less_Than Exp Exp
          | Greater_Than Exp Exp
          | Equals_Equals Exp Exp
          | Equals Exp Exp
+         | Not_Equal Exp Exp
          deriving Show
 
 parseError :: [Token] -> a
