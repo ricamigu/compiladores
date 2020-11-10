@@ -61,13 +61,11 @@ Exp : num { Num $1 }
     | Exp '<' Exp { Less_Than $1 $3 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
-    | Exp '=' Exp { Equals $1 $3 }
+    | string '=' Exp ';' {Atrib $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
 
 {
-
-data Stm = Exp
 
 data Exp = Num Int
          | Var String
@@ -77,6 +75,7 @@ data Exp = Num Int
          | Mult Exp Exp
          | Div Exp Exp
          | Mod Exp Exp
+         | Atrib String Exp
          | Less_Equal Exp Exp
          | Greater_Equal Exp Exp
          | Less_Than Exp Exp
