@@ -61,6 +61,7 @@ Exp : num { Num $1 }
     | Exp '<' Exp { Less_Than $1 $3 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
+    | int string ';' { Inic $2 }
     | string '=' Exp ';' {Atrib $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
@@ -69,6 +70,7 @@ Exp : num { Num $1 }
 
 data Exp = Num Int
          | Var String
+         | Inic String
          | Boolean Bool
          | Add Exp Exp
          | Minus Exp Exp
