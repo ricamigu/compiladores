@@ -18,8 +18,8 @@ else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
 bool                      { \s -> TOK_BOOLEAN } -- testar
-true                      { \s -> TOK_BOOL s }
-false                     { \s -> TOK_BOOL s }
+True                      { \s -> TOK_BOOL True }
+False                     { \s -> TOK_BOOL False }
 $digit+                   { \s -> TOK_NUM (read s) }
 $letter($letter|$digit)*  { \s -> TOK_ID s}
 "//".*                    ; -- comentario de uma linha
@@ -47,7 +47,7 @@ $quote                    { \s -> TOK_DOUBLE_QUOTES}
 {
 data Token = TOK_NUM Int
            | TOK_BOOLEAN
-           | TOK_BOOL String
+           | TOK_BOOL Bool
            | TOK_STRING String
            | TOK_ID String
            | TOK_INT
