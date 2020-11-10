@@ -11,11 +11,13 @@ $quote = [\"]
 tokens :-
 
 $white+                   ; -- ignorar carateres brancos
+int                       { \s -> TOK_INT } -- testar
 if                        { \s -> TOK_IF }
 then                      { \s -> TOK_THEN }
 else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
+bool                      { \s -> TOK_BOOLS } -- testar
 true                      { \s -> TOK_BOOL s }
 false                     { \s -> TOK_BOOL s }
 $digit+                   { \s -> TOK_NUM (read s) }
@@ -44,9 +46,11 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 $quote                    { \s -> TOK_DOUBLE_QUOTES}
 {
 data Token = TOK_NUM Int
+           | TOK_BOOLS
            | TOK_BOOL String
            | TOK_STRING String
            | TOK_ID String
+           | TOK_INT
            | TOK_DOUBLE_QUOTES
            | TOK_LPAREN
            | TOK_RPAREN
