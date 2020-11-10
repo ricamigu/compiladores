@@ -45,7 +45,12 @@ False                     { TOK_BOOL $$ }
 
 %% -- gramatica
 
-Start : Exp { $1 }
+Start : Exp { () }	
+      | Decl { () }
+
+Decl : int string ';' { Inic $2 }
+     | int string '=' Exp ';' {Inic1 $2 $4 }
+     | string '=' Exp ';' {Atrib $1 $3 }
 
 Exp : num { Num $1 }
     | string { Var $1 }
@@ -61,23 +66,29 @@ Exp : num { Num $1 }
     | Exp '<' Exp { Less_Than $1 $3 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
-    | int string ';' { Inic $2 }
-    | string '=' Exp ';' {Atrib $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
 
+
 {
+
+data Start = Exp 
+           | Decl
+           deriving Show
+
+data Decl = Inic String
+          | Inic1 String Exp
+          | Atrib String Exp
+          deriving Show
 
 data Exp = Num Int
          | Var String
-         | Inic String
          | Boolean Bool
          | Add Exp Exp
          | Minus Exp Exp
          | Mult Exp Exp
          | Div Exp Exp
          | Mod Exp Exp
-         | Atrib String Exp
          | Less_Equal Exp Exp
          | Greater_Equal Exp Exp
          | Less_Than Exp Exp
