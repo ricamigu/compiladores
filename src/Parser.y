@@ -17,6 +17,7 @@ then                      { TOK_THEN }
 else                      { TOK_ELSE }
 return                    { TOK_RETURN }
 while                     { TOK_WHILE }
+bool                      { TOK_BOOLEAN }
 True                      { TOK_BOOL $$ }
 False                     { TOK_BOOL $$ }
 '+'                       { TOK_PLUS }
@@ -45,17 +46,16 @@ False                     { TOK_BOOL $$ }
 
 %% -- gramatica
 
---- Start : Stm { $1 }	
----       | Decl { () }
 
 Stm : string '=' Exp ';' { Assign $1 $3 }
+    | int string ';' { InitInt $2 }
+    | int string '=' Exp ';' {InitIntAssign $2 $4 }
+    | bool string ';' { InitBool $2 }
+    | bool string '=' Exp ';' {InitBoolAssign $2 $4 }
     | if Exp '{' Stm '}' Stm { If $2 $4 $6}
-    | if Exp '{' Stm '}' Stm { If $2 $4 Skip }
+    | if Exp '{' Stm '}' { If $2 $4 Skip }
+    | Stm Stm { MoreStm $1 $2 }
     | while Exp '{' Stm '}' { While $2 $4}
-
-Decl : int string ';' { Inic $2 }
-     | int string '=' Exp ';' {Inic1 $2 $4 }
-     | string '=' Exp ';' {Atrib $1 $3 }
 
 Exp : num { Num $1 }
     | string { Var $1 }
@@ -76,16 +76,6 @@ Exp : num { Num $1 }
 
 {
 
-data Start = Exp 
-           | Decl
-           | Stm
-           deriving Show
-
-data Decl = Inic String
-          | Inic1 String Exp
-          | Atrib String Exp
-          deriving Show
-
 data Exp = Num Int
          | Var String
          | Boolean Bool
@@ -104,8 +94,13 @@ data Exp = Num Int
          deriving Show
 
 data Stm = Assign String Exp
+         | InitInt String
+         | InitIntAssign String Exp
+         | InitBool String
+         | InitBoolAssign String Exp
          | If Exp Stm Stm
          | While Exp Stm
+         | MoreStm Stm Stm
          | Skip
          deriving Show
 
