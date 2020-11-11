@@ -45,8 +45,13 @@ False                     { TOK_BOOL $$ }
 
 %% -- gramatica
 
-Start : Exp { () }	
-      | Decl { () }
+--- Start : Stm { $1 }	
+---       | Decl { () }
+
+Stm : string '=' Exp ';' { Assign $1 $3 }
+    | if Exp '{' Stm '}' Stm { If $2 $4 $6}
+    | if Exp '{' Stm '}' Stm { If $2 $4 Skip }
+    | while Exp '{' Stm '}' { While $2 $4}
 
 Decl : int string ';' { Inic $2 }
      | int string '=' Exp ';' {Inic1 $2 $4 }
@@ -69,11 +74,11 @@ Exp : num { Num $1 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
 
-
 {
 
 data Start = Exp 
            | Decl
+           | Stm
            deriving Show
 
 data Decl = Inic String
@@ -97,6 +102,13 @@ data Exp = Num Int
          | Equals Exp Exp
          | Not_Equal Exp Exp
          deriving Show
+
+data Stm = Assign String Exp
+         | If Exp Stm Stm
+         | While Exp Stm
+         | Skip
+         deriving Show
+
 
 parseError :: [Token] -> a
 parseError toks = error "parse error"
