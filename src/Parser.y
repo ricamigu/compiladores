@@ -54,8 +54,9 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | bool string '=' Exp ';' {InitBoolAssign $2 $4 }
     | if Exp '{' Stm '}' Stm { If $2 $4 $6}
     | if Exp '{' Stm '}' { If $2 $4 Skip }
+    | if Exp '{' Stm '}' else '{' Stm '}' { If $2 $4 $8}
     | Stm Stm { MoreStm $1 $2 }
-    | while Exp '{' Stm '}' { While $2 $4}
+    | while Exp '{' Stm '}' { While $2 $4 }
 
 Exp : num { Num $1 }
     | string { Var $1 }
