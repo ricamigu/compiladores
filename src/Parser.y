@@ -46,6 +46,20 @@ false                     { TOK_BOOL $$ }
 
 %% -- gramatica
 
+
+Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2 $4 $7 $8} -- virgulas
+     | bool string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
+
+FuncAssign : { E } -- epsilon
+           | int string ',' { FuncIntAssign $2 }
+           | bool string ',' { FuncBoolAssign $2 }
+           | int string { FuncIntAssign $2 }
+           | bool string { FuncBoolAssign $2 }
+           | FuncAssignBlock { FuncBlock $1 }
+
+FuncAssignBlock : FuncAssign { [$1] }
+                | FuncAssignBlock FuncAssign { $1 ++ [$2] }
+
 Stm : string '=' Exp ';' { Assign $1 $3 }
     | int string ';' { InitInt $2 }
     | int string '=' Exp ';' {InitIntAssign $2 $4 }
@@ -56,6 +70,14 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | if Exp Stm else Stm { If $2 $3 $5 }
     | while Exp Stm { While $2 $3}
     | '{' StmBlock '}' { Block $2 }
+    | ReturnStm { Return $1}
+
+
+ReturnStm : return string ';' {ReturnVar $2}
+          | return num ';' {ReturnInt $2}
+          | return true ';' {ReturnBool $2}
+          | return false ';' {ReturnBool $2}
+
 
 StmBlock : Stm { [$1] }
          | StmBlock Stm { $1 ++ [$2] }
@@ -108,7 +130,26 @@ data Stm = Assign String Exp
          | While Exp Stm
          | Block [Stm]
          | Skip
+         | Return ReturnStm
          deriving Show
+
+data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
+          | InitBoolFunc String FuncAssign [Stm] ReturnStm
+          deriving Show
+
+data FuncAssign = E
+                | FuncIntAssign String
+                | FuncBoolAssign String
+                | FuncBlock [FuncAssign]
+                deriving Show
+
+data FuncAssignBlock = FuncAssign
+                     deriving Show
+
+data ReturnStm = ReturnVar String
+               | ReturnInt Int
+               | ReturnBool Bool
+               deriving Show
 
 parseError :: [Token] -> a
 parseError toks = error "parse error"
