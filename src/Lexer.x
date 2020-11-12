@@ -11,15 +11,15 @@ $quote = [\"]
 tokens :-
 
 $white+                   ; -- ignorar carateres brancos
-int                       { \s -> TOK_INT } -- testar
+int                       { \s -> TOK_INT } 
 if                        { \s -> TOK_IF }
 then                      { \s -> TOK_THEN }
 else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
-bool                      { \s -> TOK_BOOLEAN } -- testar
-True                      { \s -> TOK_BOOL True }
-False                     { \s -> TOK_BOOL False }
+bool                      { \s -> TOK_BOOLEAN } 
+true                      { \s -> TOK_BOOL True }
+false                     { \s -> TOK_BOOL False }
 $digit+                   { \s -> TOK_NUM (read s) }
 $letter($letter|$digit)*  { \s -> TOK_ID s}
 "//".*                    ; -- comentario de uma linha

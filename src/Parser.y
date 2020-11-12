@@ -18,8 +18,8 @@ else                      { TOK_ELSE }
 return                    { TOK_RETURN }
 while                     { TOK_WHILE }
 bool                      { TOK_BOOLEAN }
-True                      { TOK_BOOL $$ }
-False                     { TOK_BOOL $$ }
+true                      { TOK_BOOL $$ }
+false                     { TOK_BOOL $$ }
 '+'                       { TOK_PLUS }
 '-'                       { TOK_MINUS }
 '*'                       { TOK_MULT }
@@ -42,26 +42,28 @@ False                     { TOK_BOOL $$ }
 
 %nonassoc '<=' '>=' '<' '>' '==' '='
 %left '+' '-'
-%left '*' '/'
+%left '*' '/' '%'
 
 %% -- gramatica
-
 
 Stm : string '=' Exp ';' { Assign $1 $3 }
     | int string ';' { InitInt $2 }
     | int string '=' Exp ';' {InitIntAssign $2 $4 }
     | bool string ';' { InitBool $2 }
     | bool string '=' Exp ';' {InitBoolAssign $2 $4 }
-    | if Exp '{' Stm '}' Stm { If $2 $4 $6}
-    | if Exp '{' Stm '}' { If $2 $4 Skip }
-    | if Exp '{' Stm '}' else '{' Stm '}' { If $2 $4 $8}
-    | Stm Stm { MoreStm $1 $2 }
-    | while Exp '{' Stm '}' { While $2 $4 }
+    | if Exp Stm Stm { If $2 $3 $4}
+    | if Exp Stm { If $2 $3 Skip }
+    | if Exp Stm else Stm { If $2 $3 $5 }
+    | while Exp Stm { While $2 $3}
+    | '{' StmBlock '}' { Block $2 }
+
+StmBlock : Stm { [$1] }
+         | StmBlock Stm { $1 ++ [$2] }
 
 Exp : num { Num $1 }
     | string { Var $1 }
-    | True { Boolean $1}
-    | False { Boolean $1}
+    | true { Boolean $1}
+    | false { Boolean $1}
     | Exp '+' Exp { Add $1 $3 }
     | Exp '-' Exp { Minus $1 $3 }
     | Exp '*' Exp { Mult $1 $3 }
@@ -94,6 +96,9 @@ data Exp = Num Int
          | Not_Equal Exp Exp
          deriving Show
 
+data StmBlock = Stm
+              deriving Show
+
 data Stm = Assign String Exp
          | InitInt String
          | InitIntAssign String Exp
@@ -101,10 +106,9 @@ data Stm = Assign String Exp
          | InitBoolAssign String Exp
          | If Exp Stm Stm
          | While Exp Stm
-         | MoreStm Stm Stm
+         | Block [Stm]
          | Skip
          deriving Show
-
 
 parseError :: [Token] -> a
 parseError toks = error "parse error"
