@@ -73,11 +73,7 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | ReturnStm { Return $1}
 
 
-ReturnStm : return string ';' {ReturnVar $2}
-          | return num ';' {ReturnInt $2}
-          | return true ';' {ReturnBool $2}
-          | return false ';' {ReturnBool $2}
-
+ReturnStm : return Exp ';' { ReturnExp $2 }
 
 StmBlock : Stm { [$1] }
          | StmBlock Stm { $1 ++ [$2] }
@@ -98,6 +94,8 @@ Exp : num { Num $1 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | '(' Exp ')' { $2 }
+
+--- chamar uma função é uma expressão? statement? ou os dois?
 
 {
 
@@ -146,10 +144,8 @@ data FuncAssign = E
 data FuncAssignBlock = FuncAssign
                      deriving Show
 
-data ReturnStm = ReturnVar String
-               | ReturnInt Int
-               | ReturnBool Bool
-               deriving Show
+data ReturnStm = ReturnExp Exp
+               deriving Show          
 
 parseError :: [Token] -> a
 parseError toks = error "parse error"
