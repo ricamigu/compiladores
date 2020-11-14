@@ -47,8 +47,10 @@ false                     { TOK_BOOL $$ }
 %% -- gramatica
 
 
-Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2 $4 $7 $8} -- virgulas
+Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2 $4 $7 $8 } -- virgulas
      | bool string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
+     | int string '(' FuncAssign ')' '{' ReturnStm '}' { InitIntFuncE $2 $4 $7 }
+     | bool string '(' FuncAssign ')' '{' ReturnStm '}' { InitBoolFuncE $2 $4 $7 }
 
 FuncAssign : { E } -- epsilon
            | int string ',' { FuncIntAssign $2 }
@@ -108,6 +110,8 @@ ExpCallBlock : ExpCall { [$1] }
 
 data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
           | InitBoolFunc String FuncAssign [Stm] ReturnStm
+          | InitIntFuncE String FuncAssign ReturnStm
+          | InitBoolFuncE String FuncAssign ReturnStm
           deriving Show
 
 data FuncAssign = E
