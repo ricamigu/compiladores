@@ -70,8 +70,8 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | if Exp Stm else Stm { If $2 $3 $5 }
     | while Exp Stm { While $2 $3}
     | '{' StmBlock '}' { Block $2 }
+    | string '(' ExpCall ')' ';' { FuncCallStm $1 $3 } 
     | ReturnStm { Return $1}
-
 
 ReturnStm : return Exp ';' { ReturnExp $2 }
 
@@ -93,11 +93,31 @@ Exp : num { Num $1 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
+    | string '(' ExpCall ')' { FuncCall $1 $3 } 
     | '(' Exp ')' { $2 }
 
---- chamar uma função é uma expressão? statement? ou os dois?
+ExpCall : { Eps } -- epsilon
+        | Exp ',' { ExpSend $1 }
+        | Exp { ExpSend $1 }   
+        | ExpCallBlock { ExpBlock $1 }
+
+ExpCallBlock : ExpCall { [$1] }
+             | ExpCallBlock ExpCall { $1 ++ [$2] }
 
 {
+
+data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
+          | InitBoolFunc String FuncAssign [Stm] ReturnStm
+          deriving Show
+
+data FuncAssign = E
+                | FuncIntAssign String
+                | FuncBoolAssign String
+                | FuncBlock [FuncAssign]
+                deriving Show
+
+data FuncAssignBlock = FuncAssign
+                     deriving Show
 
 data Exp = Num Int
          | Var String
@@ -114,10 +134,16 @@ data Exp = Num Int
          | Equals_Equals Exp Exp
          | Equals Exp Exp
          | Not_Equal Exp Exp
+         | FuncCall String ExpCall 
          deriving Show
 
-data StmBlock = Stm
-              deriving Show
+data ExpCall = Eps
+             | ExpSend Exp
+             | ExpBlock [ExpCall]
+             deriving Show
+
+data ExpCallBlock = ExpCall
+                  deriving Show         
 
 data Stm = Assign String Exp
          | InitInt String
@@ -128,21 +154,12 @@ data Stm = Assign String Exp
          | While Exp Stm
          | Block [Stm]
          | Skip
+         | FuncCallStm String ExpCall 
          | Return ReturnStm
          deriving Show
 
-data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
-          | InitBoolFunc String FuncAssign [Stm] ReturnStm
-          deriving Show
-
-data FuncAssign = E
-                | FuncIntAssign String
-                | FuncBoolAssign String
-                | FuncBlock [FuncAssign]
-                deriving Show
-
-data FuncAssignBlock = FuncAssign
-                     deriving Show
+data StmBlock = Stm
+              deriving Show
 
 data ReturnStm = ReturnExp Exp
                deriving Show          
