@@ -20,6 +20,8 @@ while                     { \s -> TOK_WHILE }
 bool                      { \s -> TOK_BOOLEAN } 
 true                      { \s -> TOK_BOOL True }
 false                     { \s -> TOK_BOOL False }
+scan_int                  { \s -> TOK_SCAN_INT }
+print_int                 { \s -> TOK_PRINT_INT }
 $digit+                   { \s -> TOK_NUM (read s) }
 $letter($letter|$digit)*  { \s -> TOK_ID s}
 "//".*                    ; -- comentario de uma linha
@@ -76,5 +78,7 @@ data Token = TOK_NUM Int
            | TOK_EQUALS_EQUALS
            | TOK_MOD
            | TOK_RETURN
+           | TOK_SCAN_INT
+           | TOK_PRINT_INT
            deriving (Eq,Show)
 }

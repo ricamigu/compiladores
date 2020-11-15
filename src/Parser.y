@@ -20,6 +20,8 @@ while                     { TOK_WHILE }
 bool                      { TOK_BOOLEAN }
 true                      { TOK_BOOL $$ }
 false                     { TOK_BOOL $$ }
+scan_int                  { TOK_SCAN_INT }
+print_int                 { TOK_PRINT_INT }
 '+'                       { TOK_PLUS }
 '-'                       { TOK_MINUS }
 '*'                       { TOK_MULT }
@@ -46,6 +48,10 @@ false                     { TOK_BOOL $$ }
 
 %% -- gramatica
 
+--- print_int(v) print_int(Exp) print_int(func()) , statement com argumentos
+
+Start : Func { [$1] }
+      | Start Func { $1 ++ [$2] }
 
 Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2 $4 $7 $8 } -- virgulas
      | bool string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
@@ -72,7 +78,8 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | if Exp Stm else Stm { If $2 $3 $5 }
     | while Exp Stm { While $2 $3}
     | '{' StmBlock '}' { Block $2 }
-    | string '(' ExpCall ')' ';' { FuncCallStm $1 $3 } 
+    | string '(' ExpCall ')' ';' { FuncCallStm $1 $3 }
+    | print_int '(' Exp ')' ';' { PrintInt $3 }
     | ReturnStm { Return $1}
 
 ReturnStm : return Exp ';' { ReturnExp $2 }
@@ -96,6 +103,7 @@ Exp : num { Num $1 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | string '(' ExpCall ')' { FuncCall $1 $3 } 
+    | scan_int '(' ')' { Scan }
     | '(' Exp ')' { $2 }
 
 ExpCall : { Eps } -- epsilon
@@ -107,6 +115,9 @@ ExpCallBlock : ExpCall { [$1] }
              | ExpCallBlock ExpCall { $1 ++ [$2] }
 
 {
+
+data Start = Func
+           deriving Show
 
 data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
           | InitBoolFunc String FuncAssign [Stm] ReturnStm
@@ -139,6 +150,7 @@ data Exp = Num Int
          | Equals Exp Exp
          | Not_Equal Exp Exp
          | FuncCall String ExpCall 
+         | Scan
          deriving Show
 
 data ExpCall = Eps
@@ -160,6 +172,7 @@ data Stm = Assign String Exp
          | Skip
          | FuncCallStm String ExpCall 
          | Return ReturnStm
+         | PrintInt Exp
          deriving Show
 
 data StmBlock = Stm
