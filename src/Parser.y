@@ -48,8 +48,6 @@ print_int                 { TOK_PRINT_INT }
 
 %% -- gramatica
 
---- print_int(v) print_int(Exp) print_int(func()) , statement com argumentos
-
 Start : Func { [$1] }
       | Start Func { $1 ++ [$2] }
 
