@@ -22,6 +22,7 @@ true                      { TOK_BOOL $$ }
 false                     { TOK_BOOL $$ }
 scan_int                  { TOK_SCAN_INT }
 print_int                 { TOK_PRINT_INT }
+main                      { TOK_MAIN_FUNC }
 '+'                       { TOK_PLUS }
 '-'                       { TOK_MINUS }
 '*'                       { TOK_MULT }
@@ -55,6 +56,7 @@ Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2
      | bool string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
      | int string '(' FuncAssign ')' '{' ReturnStm '}' { InitIntFuncE $2 $4 $7 }
      | bool string '(' FuncAssign ')' '{' ReturnStm '}' { InitBoolFuncE $2 $4 $7 }
+     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- acabar
 
 FuncAssign : { E } -- epsilon
            | int string ',' { FuncIntAssign $2 }
@@ -121,6 +123,7 @@ data Func = InitIntFunc String FuncAssign [Stm] ReturnStm
           | InitBoolFunc String FuncAssign [Stm] ReturnStm
           | InitIntFuncE String FuncAssign ReturnStm
           | InitBoolFuncE String FuncAssign ReturnStm
+          | MainFunc [Stm]
           deriving Show
 
 data FuncAssign = E
