@@ -14,7 +14,6 @@ $white+                   ; -- ignorar carateres brancos
 int                       { \s -> TOK_INT }
 main                      { \s -> TOK_MAIN_FUNC } 
 if                        { \s -> TOK_IF }
-then                      { \s -> TOK_THEN }
 else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
@@ -33,7 +32,6 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 "/"                       { \s -> TOK_DIV }
 ","                       { \s -> TOK_COMMA }
 ";"                       { \s -> TOK_SEMICOLON }
-"."                       { \s -> TOK_DOT }
 "("                       { \s -> TOK_LPAREN }
 ")"                       { \s -> TOK_RPAREN }
 "{"                       { \s -> TOK_LBRACE }
@@ -65,10 +63,8 @@ data Token = TOK_NUM Int
            | TOK_DIV
            | TOK_NOT_EQUAL
            | TOK_COMMA
-           | TOK_DOT
            | TOK_SEMICOLON
            | TOK_IF
-           | TOK_THEN
            | TOK_ELSE
            | TOK_WHILE
            | TOK_EQUALS

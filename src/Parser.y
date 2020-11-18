@@ -14,7 +14,6 @@ num                       { TOK_NUM $$ }
 string                    { TOK_ID $$ }
 main                      { TOK_MAIN_FUNC }
 if                        { TOK_IF }
-then                      { TOK_THEN }
 else                      { TOK_ELSE }
 return                    { TOK_RETURN }
 while                     { TOK_WHILE }
@@ -29,7 +28,6 @@ print_int                 { TOK_PRINT_INT }
 '/'                       { TOK_DIV }
 ','                       { TOK_COMMA }
 ';'                       { TOK_SEMICOLON }
-'.'                       { TOK_DOT }
 '('                       { TOK_LPAREN }
 ')'                       { TOK_RPAREN }
 '{'                       { TOK_LBRACE }
@@ -87,6 +85,7 @@ Exp : num { Num $1 }
     | string { Var $1 }
     | true { Boolean $1}
     | false { Boolean $1}
+    | '(' Exp ')' { $2 }
     | Exp '+' Exp { Add $1 $3 }
     | Exp '-' Exp { Minus $1 $3 }
     | Exp '*' Exp { Mult $1 $3 }
@@ -100,14 +99,12 @@ Exp : num { Num $1 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | string '(' ExpCallBlock ')' { FuncCall $1 $3 } 
     | scan_int '(' ')' { Scan }
-    | '(' Exp ')' { $2 }
 
-ExpCall : Exp ',' { ExpSend $1 }
-        | Exp { ExpSend $1 }   
+ExpCall : Exp { ExpSend $1 }
 
-ExpCallBlock : { [] } -- epsilon
+ExpCallBlock : { [] }
              | ExpCall { [$1] }
-             | ExpCallBlock ExpCall { $1 ++ [$2] }
+             | ExpCallBlock ',' ExpCall { $1 ++ [$3] }
 
 {
 
