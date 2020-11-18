@@ -11,7 +11,8 @@ $quote = [\"]
 tokens :-
 
 $white+                   ; -- ignorar carateres brancos
-int                       { \s -> TOK_INT } 
+int                       { \s -> TOK_INT }
+main                      { \s -> TOK_MAIN_FUNC } 
 if                        { \s -> TOK_IF }
 then                      { \s -> TOK_THEN }
 else                      { \s -> TOK_ELSE }
@@ -22,7 +23,6 @@ true                      { \s -> TOK_BOOL True }
 false                     { \s -> TOK_BOOL False }
 scan_int                  { \s -> TOK_SCAN_INT }
 print_int                 { \s -> TOK_PRINT_INT }
-main                      { \s -> TOK_MAIN_FUNC }
 $digit+                   { \s -> TOK_NUM (read s) }
 $letter($letter|$digit)*  { \s -> TOK_ID s}
 "//".*                    ; -- comentario de uma linha
