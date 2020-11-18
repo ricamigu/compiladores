@@ -108,8 +108,8 @@ Exp : num { Num $1 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
     | Exp '&&' Exp { And $1 $3 }
     | Exp '||' Exp { Or $1 $3 }
-    | Exp '++' { Plus_Plus $1 }
-    | Exp "--" { Minus_Minus $1 }
+    | Exp '++' { Plus_Plus $1 } -- so nos fors
+    | Exp "--" { Minus_Minus $1 } 
     | '!'Exp       { Not $2 }
     | id '(' ExpCallBlock ')' { FuncCall $1 $3 } 
     | scan_int '(' ')' { Scan }
@@ -120,7 +120,7 @@ ExpCallBlock : { [] }
              | ExpCall { [$1] }
              | ExpCallBlock ',' ExpCall { $1 ++ [$3] }
 
-Type : int { Type_Int}
+Type : int { Type_Int} -- definicao de tipos
      | bool { Type_Bool }
      | string { Type_String }
 
