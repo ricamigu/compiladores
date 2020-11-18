@@ -56,7 +56,7 @@ Func : int string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2
      | bool string '(' FuncAssign ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
      | int string '(' FuncAssign ')' '{' ReturnStm '}' { InitIntFuncE $2 $4 $7 }
      | bool string '(' FuncAssign ')' '{' ReturnStm '}' { InitBoolFuncE $2 $4 $7 }
-     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- acabar
+     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 }
 
 FuncAssign : { E } -- epsilon
            | int string ',' { FuncIntAssign $2 }
@@ -73,7 +73,6 @@ Stm : string '=' Exp ';' { Assign $1 $3 }
     | int string '=' Exp ';' {InitIntAssign $2 $4 }
     | bool string ';' { InitBool $2 }
     | bool string '=' Exp ';' {InitBoolAssign $2 $4 }
-    | if Exp Stm Stm { If $2 $3 $4}
     | if Exp Stm { If $2 $3 Skip }
     | if Exp Stm else Stm { If $2 $3 $5 }
     | while Exp Stm { While $2 $3}
