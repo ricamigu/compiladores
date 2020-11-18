@@ -17,11 +17,15 @@ if                        { \s -> TOK_IF }
 else                      { \s -> TOK_ELSE }
 return                    { \s -> TOK_RETURN }
 while                     { \s -> TOK_WHILE }
+string                    { \s -> TOK_STRING }
+for                       { \s -> TOK_FOR }
+$quote($letter|$digit|$white)*$quote { \s -> TOK_TEXT (read s) }
 bool                      { \s -> TOK_BOOLEAN } 
 true                      { \s -> TOK_BOOL True }
 false                     { \s -> TOK_BOOL False }
 scan_int                  { \s -> TOK_SCAN_INT }
 print_int                 { \s -> TOK_PRINT_INT }
+print_str                 { \s -> TOK_PRINT_STR }
 $digit+                   { \s -> TOK_NUM (read s) }
 $letter($letter|$digit)*  { \s -> TOK_ID s}
 "//".*                    ; -- comentario de uma linha
@@ -44,12 +48,19 @@ $letter($letter|$digit)*  { \s -> TOK_ID s}
 ">="                      { \s -> TOK_GREATER_OR_EQUAL }
 "<"                       { \s -> TOK_LESS_THAN }
 ">"                       { \s -> TOK_GREATER_THAN }
+"!"                       { \s -> TOK_NOT }
+"&&"                      { \s -> TOK_AND }
+"||"                      { \s -> TOK_OR }
+"++"                      { \s -> TOK_PLUS_PLUS }
+"--"                      { \s -> TOK_MINUS_MINUS }
 $quote                    { \s -> TOK_DOUBLE_QUOTES}
+
 {
 data Token = TOK_NUM Int
            | TOK_BOOLEAN
            | TOK_BOOL Bool
-           | TOK_STRING String
+           | TOK_STRING
+           | TOK_TEXT String
            | TOK_ID String
            | TOK_INT
            | TOK_DOUBLE_QUOTES
@@ -77,6 +88,13 @@ data Token = TOK_NUM Int
            | TOK_RETURN
            | TOK_SCAN_INT
            | TOK_PRINT_INT
+           | TOK_PRINT_STR
            | TOK_MAIN_FUNC
+           | TOK_NOT
+           | TOK_AND
+           | TOK_OR
+           | TOK_PLUS_PLUS
+           | TOK_MINUS_MINUS
+           | TOK_FOR
            deriving (Eq,Show)
 }

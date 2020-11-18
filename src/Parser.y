@@ -11,10 +11,13 @@ import Lexer
 
 int                       { TOK_INT }
 num                       { TOK_NUM $$ }
-string                    { TOK_ID $$ }
+id                        { TOK_ID $$ }
 main                      { TOK_MAIN_FUNC }
+for                       { TOK_FOR }
 if                        { TOK_IF }
 else                      { TOK_ELSE }
+string                    { TOK_STRING }
+text                      { TOK_TEXT $$ }
 return                    { TOK_RETURN }
 while                     { TOK_WHILE }
 bool                      { TOK_BOOLEAN }
@@ -22,6 +25,7 @@ true                      { TOK_BOOL $$ }
 false                     { TOK_BOOL $$ }
 scan_int                  { TOK_SCAN_INT }
 print_int                 { TOK_PRINT_INT }
+print_str                 { TOK_PRINT_STR }
 '+'                       { TOK_PLUS }
 '-'                       { TOK_MINUS }
 '*'                       { TOK_MULT }
@@ -40,40 +44,44 @@ print_int                 { TOK_PRINT_INT }
 '>='                      { TOK_GREATER_OR_EQUAL }  
 '<'                       { TOK_LESS_THAN }  
 '>'                       { TOK_GREATER_THAN } 
+'!'                       { TOK_NOT }
+'&&'                      { TOK_AND }
+'||'                      { TOK_OR }
+'++'                      { TOK_PLUS_PLUS }
+"--"                      { TOK_MINUS_MINUS }
 
+%left '&&' '||'
 %nonassoc '<=' '>=' '<' '>' '==' '=' '!='
 %left '+' '-' 
 %left '*' '/' '%'
+%right '!' '++' "--"
 
 %% -- gramatica
 
 Start : Func { [$1] }
       | Start Func { $1 ++ [$2] }
 
-Func : int string '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitIntFunc $2 $4 $7 $8 } -- virgulas
-     | bool string '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitBoolFunc $2 $4 $7 $8 }
-     | int string '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitIntFuncE $2 $4 $7 }
-     | bool string '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitBoolFuncE $2 $4 $7 }
-     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 }
+Func : Type id '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitFunc $1 $2 $4 $7 $8 }  -- funcoes que "obrigam" return
+     | Type id '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitFuncE $1 $2 $4 $7 } -- funcoes apenas com return
+     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- main sem return obrigatório
 
-FuncAssign : int string { FuncIntAssign $2 }
-           | bool string { FuncBoolAssign $2 }
+FuncAssign : Type id { FuncAssign $1 $2 }
 
 FuncAssignBlock : { [] } 
                 | FuncAssign { [$1] }
                 | FuncAssignBlock ',' FuncAssign { $1 ++ [$3] }
 
-Stm : string '=' Exp ';' { Assign $1 $3 }
-    | int string ';' { InitInt $2 }
-    | int string '=' Exp ';' {InitIntAssign $2 $4 }
-    | bool string ';' { InitBool $2 }
-    | bool string '=' Exp ';' {InitBoolAssign $2 $4 }
+Stm : id '=' Exp ';' { Assign $1 $3 }
+    | Type id ';' { Init $1 $2 }
+    | Type id '=' Exp ';' {InitAssign $1 $2 $4 }
     | if Exp Stm { If $2 $3 Skip }
     | if Exp Stm else Stm { If $2 $3 $5 }
     | while Exp Stm { While $2 $3}
+    | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}
     | '{' StmBlock '}' { Block $2 }
-    | string '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
+    | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
     | print_int '(' Exp ')' ';' { PrintInt $3 }
+    | print_str '(' Exp ')' ';' { PrintStr $3 }
     | ReturnStm { Return $1}
 
 ReturnStm : return Exp ';' { ReturnExp $2 }
@@ -82,9 +90,10 @@ StmBlock : Stm { [$1] }
          | StmBlock Stm { $1 ++ [$2] }
 
 Exp : num { Num $1 }
-    | string { Var $1 }
+    | id { Var $1 }
     | true { Boolean $1}
     | false { Boolean $1}
+    | text { Text $1}
     | '(' Exp ')' { $2 }
     | Exp '+' Exp { Add $1 $3 }
     | Exp '-' Exp { Minus $1 $3 }
@@ -97,7 +106,12 @@ Exp : num { Num $1 }
     | Exp '>' Exp { Greater_Than $1 $3 }
     | Exp '==' Exp { Equals_Equals $1 $3 }
     | Exp '!=' Exp { Not_Equal $1 $3 }
-    | string '(' ExpCallBlock ')' { FuncCall $1 $3 } 
+    | Exp '&&' Exp { And $1 $3 }
+    | Exp '||' Exp { Or $1 $3 }
+    | Exp '++' { Plus_Plus $1 }
+    | Exp "--" { Minus_Minus $1 }
+    | '!'Exp       { Not $2 }
+    | id '(' ExpCallBlock ')' { FuncCall $1 $3 } 
     | scan_int '(' ')' { Scan }
 
 ExpCall : Exp { ExpSend $1 }
@@ -106,25 +120,32 @@ ExpCallBlock : { [] }
              | ExpCall { [$1] }
              | ExpCallBlock ',' ExpCall { $1 ++ [$3] }
 
+Type : int { Type_Int}
+     | bool { Type_Bool }
+     | string { Type_String }
+
 {
+
+data Type = Type_Int
+          | Type_Bool
+          | Type_String
+          deriving Show
 
 data Start = Func
            deriving Show
 
-data Func = InitIntFunc String [FuncAssign] [Stm] ReturnStm
-          | InitBoolFunc String [FuncAssign] [Stm] ReturnStm
-          | InitIntFuncE String [FuncAssign] ReturnStm
-          | InitBoolFuncE String [FuncAssign] ReturnStm
+data Func = InitFunc Type String [FuncAssign] [Stm] ReturnStm
+          | InitFuncE Type String [FuncAssign] ReturnStm
           | MainFunc [Stm]
           deriving Show
 
-data FuncAssign = FuncIntAssign String
-                | FuncBoolAssign String
+data FuncAssign = FuncAssign Type String
                 deriving Show
 
 data Exp = Num Int
          | Var String
          | Boolean Bool
+         | Text String
          | Add Exp Exp
          | Minus Exp Exp
          | Mult Exp Exp
@@ -139,6 +160,11 @@ data Exp = Num Int
          | Not_Equal Exp Exp
          | FuncCall String [ExpCall]
          | Scan
+         | And Exp Exp
+         | Or Exp Exp
+         | Not Exp
+         | Plus_Plus Exp
+         | Minus_Minus Exp
          deriving Show
 
 data ExpCall = ExpSend Exp
@@ -149,17 +175,17 @@ data ExpCallBlock = ExpCall
                   deriving Show         
 
 data Stm = Assign String Exp
-         | InitInt String
-         | InitIntAssign String Exp
-         | InitBool String
-         | InitBoolAssign String Exp
+         | Init Type String
+         | InitAssign Type String Exp
          | If Exp Stm Stm
          | While Exp Stm
          | Block [Stm]
          | Skip
+         | For Stm Exp Exp Stm
          | FuncCallStm String [ExpCall] 
          | Return ReturnStm
          | PrintInt Exp
+         | PrintStr Exp
          deriving Show
 
 data StmBlock = Stm
