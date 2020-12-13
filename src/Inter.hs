@@ -98,35 +98,26 @@ transStm (Assign var expr) tabl
 --transStm  :: Table -> Stm -> State Count [Instr]
 
 
-
-
-{-
-transStm tabl (If cond stm Skip)
+transStm (If cond stm Skip) tabl
        = do ltrue  <- newLabel
             lfalse <- newLabel
-            code0  <- transCond tabl cond ltrue lfalse
-            code1  <- transStm tabl stm
+            code0  <- transCond cond tabl ltrue lfalse
+            code1  <- transStm stm tabl
             return (code0 ++ [LABEL ltrue] ++ code1 ++ [LABEL lfalse])
 
-trasnsStm tabl (If cond stm1 stm2)
+transStm (If cond stm1 stm2) tabl
        = do ltrue  <- newLabel
             lfalse <- newLabel
             lend   <- newLabel
-            code0  <- transCond tabl cond ltrue lfalse
-            code1  <- transStm tabl stm1
-            code2  <- transStm tabl stm2
+            code0  <- transCond cond tabl ltrue lfalse
+            code1  <- transStm stm1 tabl
+            code2  <- transStm stm2 tabl
             return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend,LABEL lfalse] ++ code2 ++ [LABEL lend])
 
-
---COND Temp BinOp Temp Label Label
---transStm  :: Table -> Stm -> State Count [Instr]
-transCond :: Table -> Temp -> Exp -> Temp -> Label -> Label -> State Count [Instr]
-transCond tabl (Op cond e1 e2) 
-transCond tabl (Op cond e1 e2) label1 label2
-        = do ltrue  <- newLabel
-             lfalse <- newLabel
-             t1     <- newTemp
-             t2     <- newTemp 
-             code1  <- 
-
--}
+transStm (While cond stm) tabl
+       = do label1 <- newLabel
+            label2 <- newLabel
+            label3 <- newLabel
+            code1  <- transCond cond tabl label2 label3
+            code2  <- transStm stm tabl
+            return ([LABEL label1] ++ code1 ++ [LABEL label2] ++ code2 ++ [JUMP label1, LABEL label3])
