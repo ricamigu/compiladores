@@ -17,7 +17,7 @@ int main() {
 int n;
 n = scan_int();
 if (is_prime(n))
-print_str("prime");
+print_int("prime");
 else
 print_str("not prime");
 }

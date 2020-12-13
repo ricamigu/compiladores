@@ -11,8 +11,8 @@ cabal-version:       >=1.10
                      
 executable C0
   main-is:             Main.hs
-  other-modules:       Lexer, Parser
-  build-tools:         alex, happy
-  build-depends:       base, array
+  other-modules:       Lexer, Parser, Inter
+  build-tools:         alex, happy, Haskell2010
+  build-depends:       base, array, mtl, containers
   hs-source-dirs:      src
   default-language:    Haskell2010
