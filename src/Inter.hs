@@ -17,7 +17,7 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | COND Temp BinOp Temp Label Label
            deriving Show
 
-
+{-
 data BinOp = OpAdd 
            | OpMinus 
            | OpTimes 
@@ -34,31 +34,44 @@ data BinOp = OpAdd
            | OpPlus_Plus 
            | OpMinus_Minus
            deriving Show
-
+-}
 
 type Temp = String
 type Label = String
 type Table = Map String String
 type Count = (Int,Int) -- contadores temporarios e labels
 
+
+{-
 newTemp :: Count -> (Temp,Count)
 newTemp (temps,labels) = ("t"++show temps, (temps+1,labels))
 
 newLabel :: Count -> (Label, Count)
 newLabel (temps, labels) = ("L"++show labels, (temps, labels+1))
+-}
 
---transExpr :: Exp -> Table -> Temp -> State Count [Instr]
---transExpr (Num n) table dest = return [MOVEI dest n]
---transExpr (OP op e1 e2) table dest
---    = do t1 <- newTemp
---         t2 <- newTemp
---         code1 <- transExpr e1 table t1
---         code2 <- transExpr e2 table t2
---         return (code1 ++ code2 ++ [OP op dest t1 t2])
+newTemp :: State Count Temp
+newTemp = do(temps,labels)<-get
+            put (temps+1,labels)
+            return ("t"++show temps)
+
+newLabel :: State Count Label
+newLabel = do(temps,labels)<-get
+             put (temps,labels+1)
+             return ("L"++show labels)
+
+transExp :: Exp -> Table -> Temp -> State Count [Instr]
+transExp (Num n) table dest = return [MOVEI dest n]
+transExp (Op op e1 e2) table dest
+   = do t1 <- newTemp
+        t2 <- newTemp
+        code1 <- transExp e1 table t1
+        code2 <- transExp e2 table t2
+        return (code1 ++ code2 ++ [OP op dest t1 t2])
 
 
-transExpr :: Table -> Exp -> String -> State Count [Instr]
-transExpr tabl (Var x) dest
+transExp1 :: Table -> Exp -> String -> State Count [Instr]
+transExp1 tabl (Var x) dest
     = case Map.lookup x tabl of
         Just temp -> return [MOVE dest temp]
         Nothing -> error "invalid variable"

@@ -566,7 +566,7 @@ happyReduction_31 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Add happy_var_1 happy_var_3
+		 (Op Add happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -578,7 +578,7 @@ happyReduction_32 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Minus happy_var_1 happy_var_3
+		 (Op Minus happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -590,7 +590,7 @@ happyReduction_33 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Mult happy_var_1 happy_var_3
+		 (Op Mult happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -602,7 +602,7 @@ happyReduction_34 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Div happy_var_1 happy_var_3
+		 (Op Div happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -614,7 +614,7 @@ happyReduction_35 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Mod happy_var_1 happy_var_3
+		 (Op Mod happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -626,7 +626,7 @@ happyReduction_36 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Less_Equal happy_var_1 happy_var_3
+		 (Op Less_Equal happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -638,7 +638,7 @@ happyReduction_37 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Greater_Equal happy_var_1 happy_var_3
+		 (Op Greater_Equal happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -650,7 +650,7 @@ happyReduction_38 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Less_Than happy_var_1 happy_var_3
+		 (Op Less_Than happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -662,7 +662,7 @@ happyReduction_39 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Greater_Than happy_var_1 happy_var_3
+		 (Op Greater_Than happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -674,7 +674,7 @@ happyReduction_40 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Equals_Equals happy_var_1 happy_var_3
+		 (Op Equals_Equals happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -686,7 +686,7 @@ happyReduction_41 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Not_Equal happy_var_1 happy_var_3
+		 (Op Not_Equal happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -698,7 +698,7 @@ happyReduction_42 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (And happy_var_1 happy_var_3
+		 (Op And happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -710,7 +710,7 @@ happyReduction_43 happy_x_3
 	 =  case happyOut11 happy_x_1 of { happy_var_1 -> 
 	case happyOut11 happy_x_3 of { happy_var_3 -> 
 	happyIn11
-		 (Or happy_var_1 happy_var_3
+		 (Op Or happy_var_1 happy_var_3
 	)}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -929,26 +929,29 @@ data Exp = Num Int
          | Var String
          | Boolean Bool
          | Text String
-         | Add Exp Exp
-         | Minus Exp Exp
-         | Mult Exp Exp
-         | Div Exp Exp
-         | Mod Exp Exp
-         | Less_Equal Exp Exp
-         | Greater_Equal Exp Exp
-         | Less_Than Exp Exp
-         | Greater_Than Exp Exp
-         | Equals_Equals Exp Exp
-         | Equals Exp Exp
-         | Not_Equal Exp Exp
+         | Op BinOp Exp Exp
          | FuncCall String [ExpCall]
          | Scan
-         | And Exp Exp
-         | Or Exp Exp
          | Not Exp
          | Plus_Plus Exp
          | Minus_Minus Exp
          deriving Show
+
+data BinOp = Add 
+           | Minus 
+           | Times
+           | Mult
+           | Div
+           | Mod
+           | Less_Equal
+           | Greater_Equal 
+           | Less_Than 
+           | Greater_Than 
+           | Equals_Equals 
+           | Not_Equal 
+           | And 
+           | Or 
+           deriving Show
 
 data ExpCall = ExpSend Exp
              | ExpBlock [ExpCall]
