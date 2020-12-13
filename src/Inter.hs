@@ -74,19 +74,30 @@ transExp (Op op e1 e2) tabl dest
         return (code1 ++ code2 ++ [OP op dest t1 t2])
 
 
---transExp1 :: Table -> Exp -> String -> State Count [Instr]
---transExp1 tabl (Var x) dest
---    = case Map.lookup x tabl of
---        Just temp -> return [MOVE dest temp]
---        Nothing -> error "invalid variable"
+transCond :: Exp -> Table -> Label -> Label -> State Count [Instr]
+transCond (Op cond e1 e2) tabl labelt labelf
+        = do t1     <- newTemp
+             t2     <- newTemp 
+             code1  <- transExp e1 tabl t1
+             code2  <- transExp e2 tabl t2
+             return (code1 ++ code2 ++ [COND t1 cond t2 labelt labelf])
 
-transStm :: Table -> Stm -> State Count [Instr]
-transStm tabl (Assign var expr)
+
+transStm :: Stm -> Table -> State Count [Instr]
+transStm (Assign var expr) tabl
        = case Map.lookup var tabl of
            Nothing -> error "undefined variable"
            Just dest -> do temp <- newTemp
                            code <- transExp expr tabl temp
                            return (code ++ [MOVE dest temp])
+--transStm tabl (x:xs)
+--       = do code <- transStm tabl x ++ transStm tabl xs
+--            return code
+
+--COND Temp BinOp Temp Label Label
+--transStm  :: Table -> Stm -> State Count [Instr]
+
+
 
 
 {-
