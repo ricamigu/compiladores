@@ -61,18 +61,61 @@ newLabel = do(temps,labels)<-get
              return ("L"++show labels)
 
 transExp :: Exp -> Table -> Temp -> State Count [Instr]
-transExp (Num n) table dest = return [MOVEI dest n]
-transExp (Op op e1 e2) table dest
+transExp (Num n) tabl dest = return [MOVEI dest n]
+transExp (Var x) tabl dest
+   = do temp <- newTemp
+        return [MOVE dest temp]
+
+transExp (Op op e1 e2) tabl dest
    = do t1 <- newTemp
         t2 <- newTemp
-        code1 <- transExp e1 table t1
-        code2 <- transExp e2 table t2
+        code1 <- transExp e1 tabl t1
+        code2 <- transExp e2 tabl t2
         return (code1 ++ code2 ++ [OP op dest t1 t2])
 
 
-transExp1 :: Table -> Exp -> String -> State Count [Instr]
-transExp1 tabl (Var x) dest
-    = case Map.lookup x tabl of
-        Just temp -> return [MOVE dest temp]
-        Nothing -> error "invalid variable"
+--transExp1 :: Table -> Exp -> String -> State Count [Instr]
+--transExp1 tabl (Var x) dest
+--    = case Map.lookup x tabl of
+--        Just temp -> return [MOVE dest temp]
+--        Nothing -> error "invalid variable"
 
+transStm :: Table -> Stm -> State Count [Instr]
+transStm tabl (Assign var expr)
+       = case Map.lookup var tabl of
+           Nothing -> error "undefined variable"
+           Just dest -> do temp <- newTemp
+                           code <- transExp expr tabl temp
+                           return (code ++ [MOVE dest temp])
+
+
+{-
+transStm tabl (If cond stm Skip)
+       = do ltrue  <- newLabel
+            lfalse <- newLabel
+            code0  <- transCond tabl cond ltrue lfalse
+            code1  <- transStm tabl stm
+            return (code0 ++ [LABEL ltrue] ++ code1 ++ [LABEL lfalse])
+
+trasnsStm tabl (If cond stm1 stm2)
+       = do ltrue  <- newLabel
+            lfalse <- newLabel
+            lend   <- newLabel
+            code0  <- transCond tabl cond ltrue lfalse
+            code1  <- transStm tabl stm1
+            code2  <- transStm tabl stm2
+            return (code0 ++ [LABEL ltrue] ++ code1 ++ [JUMP lend,LABEL lfalse] ++ code2 ++ [LABEL lend])
+
+
+--COND Temp BinOp Temp Label Label
+--transStm  :: Table -> Stm -> State Count [Instr]
+transCond :: Table -> Temp -> Exp -> Temp -> Label -> Label -> State Count [Instr]
+transCond tabl (Op cond e1 e2) 
+transCond tabl (Op cond e1 e2) label1 label2
+        = do ltrue  <- newLabel
+             lfalse <- newLabel
+             t1     <- newTemp
+             t2     <- newTemp 
+             code1  <- 
+
+-}
