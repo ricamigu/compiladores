@@ -17,6 +17,7 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | LABEL Label
            | JUMP Label
            | COND Temp BinOp Temp Label Label
+           | SCAN
            deriving Show
 
 
@@ -47,12 +48,15 @@ transExp (Var x) tabl dest                                -- var
    = do temp <- newTemp
         return [MOVE dest temp]
 
-transExp (Op op e1 e2) tabl dest
+transExp (Op op e1 e2) tabl dest                          -- operações
    = do t1 <- newTemp
         t2 <- newTemp
         code1 <- transExp e1 tabl t1
         code2 <- transExp e2 tabl t2
         return (code1 ++ code2 ++ [OP op dest t1 t2])
+
+transExp (Scan) tabl dest = return [SCAN]
+        
 
 
 transCond :: Exp -> Table -> Label -> Label -> State Count [Instr]
@@ -62,7 +66,6 @@ transCond (Op cond e1 e2) tabl labelt labelf
              code1  <- transExp e1 tabl t1
              code2  <- transExp e2 tabl t2
              return (code1 ++ code2 ++ [COND t1 cond t2 labelt labelf])
-
 
 --transCond (Not cond) tabl labelt labelf
 
@@ -101,12 +104,17 @@ transStm (While cond stm) tabl
 
 
 transStm (Block x) tabl
-       = (transStmBlock x tabl)
+       = do code <- transStmBlock x tabl
+            return (code)
 
 
 transStmBlock :: [Stm] -> Table -> State Count [Instr]
 transStmBlock ([Block []]) tabl
-            = return ([])
+            = return []
+
+transStmBlock ([Block [x]]) tabl
+            = do code <- transStm x tabl
+                 return (code)
 
 transStmBlock ([Block (x:xs)]) tabl
             = do code0 <- transStm x tabl

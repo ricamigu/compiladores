@@ -71,12 +71,12 @@ FuncAssignBlock : { [] }
                 | FuncAssign { [$1] }
                 | FuncAssignBlock ',' FuncAssign { $1 ++ [$3] }
 
-Stm : id '=' Exp ';' { Assign $1 $3 }
+Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
     | Type id ';' { Init $1 $2 }
     | Type id '=' Exp ';' {InitAssign $1 $2 $4 }
-    | if Exp Stm { If $2 $3 Skip }
-    | if Exp Stm else Stm { If $2 $3 $5 }
-    | while Exp Stm { While $2 $3}
+    | if Exp Stm { If $2 $3 Skip }                      --yes
+    | if Exp Stm else Stm { If $2 $3 $5 }               --yes
+    | while Exp Stm { While $2 $3}                      --yes
     | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}
     | '{' StmBlock '}' { Block $2 }
     | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
@@ -89,30 +89,30 @@ ReturnStm : return Exp ';' { ReturnExp $2 }
 StmBlock : Stm { [$1] }
          | StmBlock Stm { $1 ++ [$2] }
 
-Exp : num { Num $1 }
-    | id { Var $1 }
-    | true { Boolean $1}
-    | false { Boolean $1}
-    | text { Text $1}
-    | '(' Exp ')' { $2 }
-    | Exp '+' Exp { Op Add $1 $3 }
-    | Exp '-' Exp { Op Minus $1 $3 }
-    | Exp '*' Exp { Op Mult $1 $3 }
-    | Exp '/' Exp { Op Div $1 $3 }
-    | Exp '%' Exp { Op Mod $1 $3 }
-    | Exp '<=' Exp { Op Less_Equal $1 $3 }
-    | Exp '>=' Exp { Op Greater_Equal $1 $3 }
-    | Exp '<' Exp { Op Less_Than $1 $3 }
-    | Exp '>' Exp { Op Greater_Than $1 $3 }
-    | Exp '==' Exp { Op Equals_Equals $1 $3 }
-    | Exp '!=' Exp { Op Not_Equal $1 $3 }
-    | Exp '&&' Exp { Op And $1 $3 }
-    | Exp '||' Exp { Op Or $1 $3 }
-    | Exp '++' { Plus_Plus $1 } -- so nos fors
-    | Exp "--" { Minus_Minus $1 } 
-    | '!'Exp       { Not $2 }
-    | id '(' ExpCallBlock ')' { FuncCall $1 $3 } 
-    | scan_int '(' ')' { Scan }
+Exp : num { Num $1 }                                    --yes
+    | id { Var $1 }                                     --yes
+    | true { Boolean $1}                                --yes
+    | false { Boolean $1}                               --yes
+    | text { Text $1}                                   --yes
+    | '(' Exp ')' { $2 }                                --yes
+    | Exp '+' Exp { Op Add $1 $3 }                      --yes
+    | Exp '-' Exp { Op Minus $1 $3 }                    --yes
+    | Exp '*' Exp { Op Mult $1 $3 }                     --yes
+    | Exp '/' Exp { Op Div $1 $3 }                      --yes
+    | Exp '%' Exp { Op Mod $1 $3 }                      --yes
+    | Exp '<=' Exp { Op Less_Equal $1 $3 }              --yes
+    | Exp '>=' Exp { Op Greater_Equal $1 $3 }           --yes
+    | Exp '<' Exp { Op Less_Than $1 $3 }                --yes
+    | Exp '>' Exp { Op Greater_Than $1 $3 }             --yes
+    | Exp '==' Exp { Op Equals_Equals $1 $3 }           --yes
+    | Exp '!=' Exp { Op Not_Equal $1 $3 }               --yes
+    | Exp '&&' Exp { Op And $1 $3 }                     --yes
+    | Exp '||' Exp { Op Or $1 $3 }                      --yes
+    | Exp '++' { Plus_Plus $1 } -- so nos fors          --yes
+    | Exp "--" { Minus_Minus $1 }                       --yes
+    | '!'Exp       { Not $2 }             
+    | id '(' ExpCallBlock ')' { FuncCall $1 $3 }         
+    | scan_int '(' ')' { Scan }                         --yes
 
 ExpCall : Exp { ExpSend $1 }
 
