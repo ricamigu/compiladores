@@ -19,38 +19,12 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | COND Temp BinOp Temp Label Label
            deriving Show
 
-{-
-data BinOp = OpAdd 
-           | OpMinus 
-           | OpTimes 
-           | OpDiv
-           | OpMod
-           | OpLess_Equal
-           | OpGreater_Equal 
-           | OpLess_Than 
-           | OpGreater_Than 
-           | OpEquals_Equals 
-           | OpNot_Equal 
-           | OpAnd 
-           | OpOr 
-           | OpPlus_Plus 
-           | OpMinus_Minus
-           deriving Show
--}
 
 type Temp = String
 type Label = String
 type Table = Map String String
 type Count = (Int,Int) -- contadores temporarios e labels
 
-
-{-
-newTemp :: Count -> (Temp,Count)
-newTemp (temps,labels) = ("t"++show temps, (temps+1,labels))
-
-newLabel :: Count -> (Label, Count)
-newLabel (temps, labels) = ("L"++show labels, (temps, labels+1))
--}
 
 -- criar novo temporario
 newTemp :: State Count Temp 
@@ -92,8 +66,6 @@ transCond (Op cond e1 e2) tabl labelt labelf
 
 --transCond (Not cond) tabl labelt labelf
 
-
-
 transStm :: Stm -> Table -> State Count [Instr]
 transStm (Assign x expr) tabl
        = case Map.lookup x tabl of
@@ -126,3 +98,17 @@ transStm (While cond stm) tabl
             code1  <- transCond cond tabl label2 label3
             code2  <- transStm stm tabl
             return ([LABEL label1] ++ code1 ++ [LABEL label2] ++ code2 ++ [JUMP label1, LABEL label3])
+
+
+transStm (Block x) tabl
+       = (transStmBlock x tabl)
+
+
+transStmBlock :: [Stm] -> Table -> State Count [Instr]
+transStmBlock ([Block []]) tabl
+            = return ([])
+
+transStmBlock ([Block (x:xs)]) tabl
+            = do code0 <- transStm x tabl
+                 code1 <- transStmBlock xs tabl
+                 return (code0 ++ code1)
