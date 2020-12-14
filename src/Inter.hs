@@ -10,6 +10,8 @@ import Data.Map (Map)
 
 data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | MOVEI Temp Int                        -- temp1 := num
+           | MOVEB Temp Bool                       -- temp1 := bool ?
+           | MOVES Temp String
            | OP BinOp Temp Temp Temp               -- temp1 := temp2 op temp3
            | OPI BinOp Temp Temp Int               -- temp1 := temp2 op num
            | LABEL Label
@@ -50,19 +52,24 @@ newLabel :: Count -> (Label, Count)
 newLabel (temps, labels) = ("L"++show labels, (temps, labels+1))
 -}
 
-newTemp :: State Count Temp
+-- criar novo temporario
+newTemp :: State Count Temp 
 newTemp = do(temps,labels)<-get
             put (temps+1,labels)
             return ("t"++show temps)
 
+-- criar novo label
 newLabel :: State Count Label
 newLabel = do(temps,labels)<-get
              put (temps,labels+1)
              return ("L"++show labels)
 
+
 transExp :: Exp -> Table -> Temp -> State Count [Instr]
-transExp (Num n) tabl dest = return [MOVEI dest n]
-transExp (Var x) tabl dest
+transExp (Num n) tabl dest     = return [MOVEI dest n]    -- int
+transExp (Boolean b) tabl dest = return [MOVEB dest b]    -- bool
+transExp (Text s) tabl dest    = return [MOVES dest s]    -- strings
+transExp (Var x) tabl dest                                -- var 
    = do temp <- newTemp
         return [MOVE dest temp]
 
@@ -83,6 +90,10 @@ transCond (Op cond e1 e2) tabl labelt labelf
              return (code1 ++ code2 ++ [COND t1 cond t2 labelt labelf])
 
 
+--transCond (Not cond) tabl labelt labelf
+
+
+
 transStm :: Stm -> Table -> State Count [Instr]
 transStm (Assign x expr) tabl
        = case Map.lookup x tabl of
@@ -90,12 +101,6 @@ transStm (Assign x expr) tabl
            Just dest -> do temp <- newTemp
                            code <- transExp expr tabl temp
                            return (code ++ [MOVE dest temp])
---transStm tabl (x:xs)
---       = do code <- transStm tabl x ++ transStm tabl xs
---            return code
-
---COND Temp BinOp Temp Label Label
---transStm  :: Table -> Stm -> State Count [Instr]
 
 
 transStm (If cond stm Skip) tabl
