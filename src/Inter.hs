@@ -18,6 +18,9 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | JUMP Label
            | COND Temp BinOp Temp Label Label
            | SCAN
+           | PRINTI Temp
+           | PRINTS Temp
+           | RETURN Temp
            deriving Show
 
 
@@ -58,15 +61,27 @@ transExp (Op op e1 e2) tabl dest                          -- operações
 transExp (Scan) tabl dest = return [SCAN]
         
 
-
 transCond :: Exp -> Table -> Label -> Label -> State Count [Instr]
+transCond (cond) tabl labelt labelf = case cond of
+          (Op op e1 e2)  -> do t1 <- newTemp
+                               t2 <- newTemp
+                               code1 <- transExp e1 tabl t1
+                               code2 <- transExp e2 tabl t2
+                               return (code1  ++ code2 ++ [COND t1 op t2 labelt labelf])
+          (Boolean True) -> return [JUMP labelt]
+          (Boolean False)-> return [JUMP labelf]
+          (Not cond)     -> do code <- transCond cond tabl labelf labelt
+                               return (code)
+
+
+{-
 transCond (Op cond e1 e2) tabl labelt labelf
         = do t1     <- newTemp
              t2     <- newTemp 
              code1  <- transExp e1 tabl t1
              code2  <- transExp e2 tabl t2
              return (code1 ++ code2 ++ [COND t1 cond t2 labelt labelf])
-
+-}
 --transCond (Not cond) tabl labelt labelf
 
 transStm :: Stm -> Table -> State Count [Instr]
@@ -76,6 +91,34 @@ transStm (Assign x expr) tabl
            Just dest -> do temp <- newTemp
                            code <- transExp expr tabl temp
                            return (code ++ [MOVE dest temp])
+
+transStm (Init tp x) tabl
+       = case Map.lookup x tabl of
+           Nothing -> error "undefined variable"
+           Just dest -> do temp <- newTemp
+                           return ([MOVE dest temp])
+
+transStm (InitAssign tp x expr) tabl
+       = case Map.lookup x tabl of
+           Nothing -> error "undefined variable"
+           Just dest -> do temp <- newTemp
+                           code <- transExp expr tabl temp
+                           return (code ++ [MOVE dest temp])
+
+transStm (PrintInt i) tabl
+       = do temp <- newTemp
+            code <- transExp i tabl temp
+            return (code ++ [PRINTI temp])
+
+transStm (PrintStr s) tabl
+       = do temp <- newTemp
+            code <- transExp s tabl temp
+            return (code ++ [PRINTS temp])
+
+transStm (Return exp) tabl
+      = do temp <- newTemp
+           code <- transExp exp tabl temp
+           return (code ++ [RETURN temp])
 
 
 transStm (If cond stm Skip) tabl
@@ -101,6 +144,18 @@ transStm (While cond stm) tabl
             code1  <- transCond cond tabl label2 label3
             code2  <- transStm stm tabl
             return ([LABEL label1] ++ code1 ++ [LABEL label2] ++ code2 ++ [JUMP label1, LABEL label3])
+
+--for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}
+transStm (For stm1 cond exp stm2) tabl
+       = do label1 <- newLabel
+            label2 <- newLabel
+            label3 <- newLabel
+            temp   <- newTemp
+            code0  <- transStm stm1 tabl
+            code1  <- transCond cond tabl label2 label3
+            code2  <- transExp exp tabl temp
+            code3  <- transStm stm2 tabl
+            return (code0 ++ [LABEL label1] ++ code1 ++ [LABEL label2] ++ code3 ++ code2 ++ [JUMP label1, LABEL label3])
 
 
 transStm (Block x) tabl

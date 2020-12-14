@@ -72,17 +72,17 @@ FuncAssignBlock : { [] }
                 | FuncAssignBlock ',' FuncAssign { $1 ++ [$3] }
 
 Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
-    | Type id ';' { Init $1 $2 }
-    | Type id '=' Exp ';' {InitAssign $1 $2 $4 }
+    | Type id ';' { Init $1 $2 }                        --yes
+    | Type id '=' Exp ';' {InitAssign $1 $2 $4 }        --yes
     | if Exp Stm { If $2 $3 Skip }                      --yes
     | if Exp Stm else Stm { If $2 $3 $5 }               --yes
     | while Exp Stm { While $2 $3}                      --yes
-    | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}
-    | '{' StmBlock '}' { Block $2 }
+    | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}--yes
+    | '{' StmBlock '}' { Block $2 }                    
     | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
-    | print_int '(' Exp ')' ';' { PrintInt $3 }
-    | print_str '(' Exp ')' ';' { PrintStr $3 }
-    | ReturnStm { Return $1}
+    | print_int '(' Exp ')' ';' { PrintInt $3 }         --yes
+    | print_str '(' Exp ')' ';' { PrintStr $3 }         --yes
+    | return Exp ';' { Return $2 }                      --yes 
 
 ReturnStm : return Exp ';' { ReturnExp $2 }
 
@@ -110,7 +110,7 @@ Exp : num { Num $1 }                                    --yes
     | Exp '||' Exp { Op Or $1 $3 }                      --yes
     | Exp '++' { Plus_Plus $1 } -- so nos fors          --yes
     | Exp "--" { Minus_Minus $1 }                       --yes
-    | '!'Exp       { Not $2 }             
+    | '!'Exp       { Not $2 }                           --yes
     | id '(' ExpCallBlock ')' { FuncCall $1 $3 }         
     | scan_int '(' ')' { Scan }                         --yes
 
@@ -186,7 +186,7 @@ data Stm = Assign String Exp
          | Skip
          | For Stm Exp Exp Stm
          | FuncCallStm String [ExpCall] 
-         | Return ReturnStm
+         | Return Exp
          | PrintInt Exp
          | PrintStr Exp
          deriving Show
