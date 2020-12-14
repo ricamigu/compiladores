@@ -84,8 +84,8 @@ transCond (Op cond e1 e2) tabl labelt labelf
 
 
 transStm :: Stm -> Table -> State Count [Instr]
-transStm (Assign var expr) tabl
-       = case Map.lookup var tabl of
+transStm (Assign x expr) tabl
+       = case Map.lookup x tabl of
            Nothing -> error "undefined variable"
            Just dest -> do temp <- newTemp
                            code <- transExp expr tabl temp
