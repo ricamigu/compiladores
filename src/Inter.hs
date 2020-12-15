@@ -170,8 +170,37 @@ transStmBlock (Block (x:xs)) tabl
 transStmBlock (Block []) tabl
             = return []
 
-
 {-
+transFunc :: Func -> Table -> State Count [Instr]
+transFunc (InitFunc tp id funcB stmB (Return (ReturnExp ret)) tabl
+            = do code0 <- transStmBlock (Block stmB) tabl
+ -}
+
+
+transFuncAssign :: [FuncAssign] -> Table -> State Count [Temp]
+transFuncAssign [assign] tabl = case assign of
+                (FuncAssign tp []) -> return []
+                (FuncAssign tp (x:xs)) -> do temp0 <- newTemp
+                                             code0 <- transFuncAssign([FuncAssign tp xs]) tabl
+                                             return ([temp0] ++ code0)
+{-
+
+transFuncAssign :: FuncAssign -> Table -> State Count [Temp]
+transFuncAssign (FuncAssign tp []) tabl 
+              = do temp0 <- newTemp
+                   return ([temp0])
+
+transFuncAssign (FuncAssign tp (x:xs)) tabl
+              = do temp0 <- newTemp 
+                   code0 <- transFuncAssign (FuncAssign tp xs) tabl
+                   return ([temp0] ++ code0) 
+
+data Func = InitFunc Type String [FuncAssign] [Stm] ReturnStm
+          | InitFuncE Type String [FuncAssign] ReturnStm
+          | MainFunc [Stm]
+          deriving Show
+
+
 transFuncAssignBlock :: FuncAssign -> Table -> State Count [Instr]
 transFuncAssignBlock (FuncAssign tp (x:xs)) tabl
                    = do temp0 <- transFuncAssign (FuncAssign tp [x]) tabl
