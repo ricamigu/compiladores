@@ -111,7 +111,7 @@ Exp : num { Num $1 }                                    --yes
     | Exp '++' { Plus_Plus $1 } -- so nos fors          --yes
     | Exp "--" { Minus_Minus $1 }                       --yes
     | '!'Exp       { Not $2 }                           --yes
-    | id '(' ExpCallBlock ')' { FuncCall $1 $3 }         
+    | id '(' ExpCallBlock ')' { FuncCall $1 $3 }        
     | scan_int '(' ')' { Scan }                         --yes
 
 ExpCall : Exp { ExpSend $1 }

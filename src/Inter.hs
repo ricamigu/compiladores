@@ -21,6 +21,7 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | PRINTI Temp
            | PRINTS Temp
            | RETURN Temp
+           | CALL String [Temp]
            deriving Show
 
 
