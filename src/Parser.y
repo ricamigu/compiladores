@@ -78,7 +78,7 @@ Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
     | if Exp Stm else Stm { If $2 $3 $5 }               --yes
     | while Exp Stm { While $2 $3}                      --yes
     | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}--yes
-    | '{' StmBlock '}' { Block $2 }                    
+    | '{' StmBlock '}' { Block $2 }                     --yes
     | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
     | print_int '(' Exp ')' ';' { PrintInt $3 }         --yes
     | print_str '(' Exp ')' ';' { PrintStr $3 }         --yes

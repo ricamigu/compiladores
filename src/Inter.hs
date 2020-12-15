@@ -73,17 +73,6 @@ transCond (cond) tabl labelt labelf = case cond of
           (Not cond)     -> do code <- transCond cond tabl labelf labelt
                                return (code)
 
-
-{-
-transCond (Op cond e1 e2) tabl labelt labelf
-        = do t1     <- newTemp
-             t2     <- newTemp 
-             code1  <- transExp e1 tabl t1
-             code2  <- transExp e2 tabl t2
-             return (code1 ++ code2 ++ [COND t1 cond t2 labelt labelf])
--}
---transCond (Not cond) tabl labelt labelf
-
 transStm :: Stm -> Table -> State Count [Instr]
 transStm (Assign x expr) tabl
        = case Map.lookup x tabl of
@@ -159,19 +148,47 @@ transStm (For stm1 cond exp stm2) tabl
 
 
 transStm (Block x) tabl
-       = do code <- transStmBlock x tabl
+       = do code <- transStmBlock (Block x) tabl
             return (code)
 
 
-transStmBlock :: [Stm] -> Table -> State Count [Instr]
-transStmBlock ([Block []]) tabl
+transStmBlock :: Stm -> Table -> State Count [Instr]
+transStmBlock (Block (x:xs)) tabl
+            = do code0 <- transStm x tabl
+                 code1 <- transStmBlock (Block xs) tabl
+                 return (code0 ++ code1)
+
+transStmBlock (Block []) tabl
             = return []
 
-transStmBlock ([Block [x]]) tabl
-            = do code <- transStm x tabl
-                 return (code)
+{-
+data Func = InitFunc Type String [FuncAssign] [Stm] ReturnStm
+          | InitFuncE Type String [FuncAssign] ReturnStm
+          | MainFunc [Stm]
+          deriving Show
 
-transStmBlock ([Block (x:xs)]) tabl
-            = do code0 <- transStm x tabl
-                 code1 <- transStmBlock xs tabl
-                 return (code0 ++ code1)
+
+transFunc :: Func -> Table -> State Count [Instr]
+transFunc (InitFunc tp fname [])
+-}
+
+transFuncAssignBlock :: FuncAssign -> Table -> State Count [Instr]
+transFuncAssignBlock (FuncAssign tp (x:xs)) tabl
+                   = do temp0 <- transFuncAssign (FuncAssign tp [x]) tabl
+                        temp1 <- transFuncAssignBlock (FuncAssign tp xs) tabl
+                        return (temp0 ++ temp1)
+
+transFuncAssign :: FuncAssign -> Table -> State Count [Instr]
+transFuncAssign (FuncAssign tp x) tabl
+                = do temp0 <- newTemp
+                     return (temp0)
+
+{-
+transExp :: Exp -> Table -> Temp -> State Count [Instr]
+transExp (Num n) tabl dest     = return [MOVEI dest n]    -- int
+transExp (Boolean b) tabl dest = return [MOVEB dest b]    -- bool
+transExp (Text s) tabl dest    = return [MOVES dest s]    -- strings
+transExp (Var x) tabl dest                                -- var 
+   = do temp <- newTemp
+        return [MOVE dest temp]
+-}
