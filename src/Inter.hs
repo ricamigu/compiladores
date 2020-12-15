@@ -21,7 +21,7 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | PRINTI Temp
            | PRINTS Temp
            | RETURN Temp
-           | CALL String [Temp]
+           | CALL String [ExpCall] Temp
            deriving Show
 
 
@@ -61,6 +61,10 @@ transExp (Op op e1 e2) tabl dest                          -- operações
 
 transExp (Scan) tabl dest = return [SCAN]
         
+transExp(FuncCall id args) tabl dest
+           = do temp0<- newTemp
+                return ([CALL id args temp0])
+
 
 transCond :: Exp -> Table -> Label -> Label -> State Count [Instr]
 transCond (cond) tabl labelt labelf = case cond of
@@ -147,6 +151,11 @@ transStm (For stm1 cond exp stm2) tabl
             code3  <- transStm stm2 tabl
             return (code0 ++ [LABEL label1] ++ code1 ++ [LABEL label2] ++ code3 ++ code2 ++ [JUMP label1, LABEL label3])
 
+transStm(FuncCallStm id args) tabl
+       = case Map.lookup id tabl of
+           Nothing -> error "undefined variable"
+           Just dest -> do temp <- newTemp
+                           return ([CALL id args temp])
 
 transStm (Block x) tabl
        = do code <- transStmBlock (Block x) tabl
@@ -162,6 +171,7 @@ transStmBlock (Block []) tabl
             = return []
 
 
+{-
 transFuncAssignBlock :: FuncAssign -> Table -> State Count [Instr]
 transFuncAssignBlock (FuncAssign tp (x:xs)) tabl
                    = do temp0 <- transFuncAssign (FuncAssign tp [x]) tabl
@@ -171,4 +181,5 @@ transFuncAssignBlock (FuncAssign tp (x:xs)) tabl
 transFuncAssign :: FuncAssign -> Table -> State Count [Instr]
 transFuncAssign (FuncAssign tp x) tabl
                 = do temp0 <- newTemp
-                     return (temp0)
+                     return ([temp0])
+-}

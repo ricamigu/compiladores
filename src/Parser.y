@@ -79,7 +79,7 @@ Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
     | while Exp Stm { While $2 $3}                      --yes
     | for '(' Stm Exp ';' Exp ')' Stm { For $3 $4 $6 $8}--yes
     | '{' StmBlock '}' { Block $2 }                     --yes
-    | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 }
+    | id '(' ExpCallBlock ')' ';' { FuncCallStm $1 $3 } --yes
     | print_int '(' Exp ')' ';' { PrintInt $3 }         --yes
     | print_str '(' Exp ')' ';' { PrintStr $3 }         --yes
     | return Exp ';' { Return $2 }                      --yes 
@@ -111,7 +111,7 @@ Exp : num { Num $1 }                                    --yes
     | Exp '++' { Plus_Plus $1 } -- so nos fors          --yes
     | Exp "--" { Minus_Minus $1 }                       --yes
     | '!'Exp       { Not $2 }                           --yes
-    | id '(' ExpCallBlock ')' { FuncCall $1 $3 }        
+    | id '(' ExpCallBlock ')' { FuncCall $1 $3 }        --yes
     | scan_int '(' ')' { Scan }                         --yes
 
 ExpCall : Exp { ExpSend $1 }
