@@ -152,7 +152,6 @@ transStm (Block x) tabl
        = do code <- transStmBlock (Block x) tabl
             return (code)
 
-
 transStmBlock :: Stm -> Table -> State Count [Instr]
 transStmBlock (Block (x:xs)) tabl
             = do code0 <- transStm x tabl
@@ -162,16 +161,6 @@ transStmBlock (Block (x:xs)) tabl
 transStmBlock (Block []) tabl
             = return []
 
-{-
-data Func = InitFunc Type String [FuncAssign] [Stm] ReturnStm
-          | InitFuncE Type String [FuncAssign] ReturnStm
-          | MainFunc [Stm]
-          deriving Show
-
-
-transFunc :: Func -> Table -> State Count [Instr]
-transFunc (InitFunc tp fname [])
--}
 
 transFuncAssignBlock :: FuncAssign -> Table -> State Count [Instr]
 transFuncAssignBlock (FuncAssign tp (x:xs)) tabl
@@ -183,13 +172,3 @@ transFuncAssign :: FuncAssign -> Table -> State Count [Instr]
 transFuncAssign (FuncAssign tp x) tabl
                 = do temp0 <- newTemp
                      return (temp0)
-
-{-
-transExp :: Exp -> Table -> Temp -> State Count [Instr]
-transExp (Num n) tabl dest     = return [MOVEI dest n]    -- int
-transExp (Boolean b) tabl dest = return [MOVEB dest b]    -- bool
-transExp (Text s) tabl dest    = return [MOVES dest s]    -- strings
-transExp (Var x) tabl dest                                -- var 
-   = do temp <- newTemp
-        return [MOVE dest temp]
--}
