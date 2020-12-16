@@ -24,6 +24,10 @@ data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | CALL String [ExpCall] Temp
            deriving Show
 
+data FunIR = FunIR String [Temp] [Instr] [Instr]
+           | FunIRE String [Temp] [Instr]
+           | FunMain [Instr]
+           deriving Show
 
 type Temp = String
 type Label = String
@@ -170,22 +174,45 @@ transStmBlock (Block (x:xs)) tabl
 transStmBlock (Block []) tabl
             = return []
 
-{-
-transFunc :: Func -> Table -> State Count [Instr]
-transFunc (InitFunc tp id funcB stmB (Return (ReturnExp ret)) tabl
-            = do code0 <- transStmBlock (Block stmB) tabl
- -}
-
 transFuncAssign :: [FuncAssign] -> Table -> State Count [Temp]
 transFuncAssign [] tabl = return []
 transFuncAssign (x:xs) tabl = case x of
                                 (FuncAssign tp var) -> do temp0 <- newTemp
                                                           temp1 <- transFuncAssign xs tabl
                                                           return ([temp0] ++ temp1)
-{-
 
-data Func = InitFunc Type String [FuncAssign] [Stm] ReturnStm
-          | InitFuncE Type String [FuncAssign] ReturnStm
-          | MainFunc [Stm]
-          deriving Show
+transFuncRunthrough :: Func -> Table -> State Count FunIR
+transFuncRunthrough (InitFunc _ id fassign stms rtstm) tabl
+                  = do code <- (transStmBlock (Block stms)) tabl
+                       temps <- transFuncAssign fassign tabl
+                       temp <- newTemp
+                       return (FunIR id temps code [RETURN temp])
+
+transFuncRunthrough (InitFuncE _ id fassign rtstm) tabl
+                  = do temps <- transFuncAssign fassign tabl
+                       temp <- newTemp
+                       return (FunIRE id temps [RETURN temp])
+
+transFuncRunthrough (MainFunc stms) tabl
+                  = do code <- (transStmBlock (Block stms)) tabl
+                       return (FunMain code)
+
+{-
+Start : Func { [$1] }
+      | Start Func { $1 ++ [$2] }
 -}
+
+transFuncStart :: [Func] -> Table -> State Count [FunIR]
+transFuncStart [] tabl = return []
+transFuncStart (x:xs) tabl = case x of
+                             (InitFunc _ id fassign stms rtstm) -> do code0 <- transFuncRunthrough x tabl
+                                                                      code1 <- transFuncStart xs tabl
+                                                                      return ([code0] ++ code1)
+
+                             (InitFuncE _ id fassign rtstm) -> do code0 <- transFuncRunthrough x tabl
+                                                                  code1 <- transFuncStart xs tabl
+                                                                  return ([code0] ++ code1)
+
+                             (MainFunc stms) -> do code0 <- transFuncRunthrough x tabl
+                                                   code1 <- transFuncStart xs tabl
+                                                   return ([code0] ++ code1)

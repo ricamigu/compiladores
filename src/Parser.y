@@ -61,9 +61,9 @@ print_str                 { TOK_PRINT_STR }
 Start : Func { [$1] }
       | Start Func { $1 ++ [$2] }
 
-Func : Type id '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitFunc $1 $2 $4 $7 $8 }  -- funcoes que "obrigam" return
-     | Type id '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitFuncE $1 $2 $4 $7 } -- funcoes apenas com return
-     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- main sem return obrigatório
+Func : Type id '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitFunc $1 $2 $4 $7 $8 }  -- funcoes que "obrigam" return  --yes
+     | Type id '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitFuncE $1 $2 $4 $7 } -- funcoes apenas com return                 --yes
+     | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- main sem return obrigatório                                         --yes
 
 FuncAssign : Type id { FuncAssign $1 $2 }
 
