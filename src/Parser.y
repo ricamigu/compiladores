@@ -58,18 +58,18 @@ print_str                 { TOK_PRINT_STR }
 
 %% -- gramatica
 
-Start : Func { [$1] }
-      | Start Func { $1 ++ [$2] }
+Start : Func { [$1] }                 --yes
+      | Start Func { $1 ++ [$2] }     --yes
 
 Func : Type id '(' FuncAssignBlock ')' '{' StmBlock ReturnStm '}' { InitFunc $1 $2 $4 $7 $8 }  -- funcoes que "obrigam" return  --yes
      | Type id '(' FuncAssignBlock ')' '{' ReturnStm '}' { InitFuncE $1 $2 $4 $7 } -- funcoes apenas com return                 --yes
      | int main '(' ')' '{' StmBlock '}' { MainFunc $6 } -- main sem return obrigatório                                         --yes
 
-FuncAssign : Type id { FuncAssign $1 $2 }
+FuncAssign : Type id { FuncAssign $1 $2 }     --yes
 
-FuncAssignBlock : { [] } 
-                | FuncAssign { [$1] }
-                | FuncAssignBlock ',' FuncAssign { $1 ++ [$3] }
+FuncAssignBlock : { [] }                                            --yes
+                | FuncAssign { [$1] }                               --yes
+                | FuncAssignBlock ',' FuncAssign { $1 ++ [$3] }     --yes
 
 Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
     | Type id ';' { Init $1 $2 }                        --yes
@@ -84,10 +84,10 @@ Stm : id '=' Exp ';' { Assign $1 $3 }                   --yes
     | print_str '(' Exp ')' ';' { PrintStr $3 }         --yes
     | return Exp ';' { Return $2 }                      --yes 
 
-ReturnStm : return Exp ';' { ReturnExp $2 }
+ReturnStm : return Exp ';' { ReturnExp $2 }             --yes
 
-StmBlock : Stm { [$1] }
-         | StmBlock Stm { $1 ++ [$2] }
+StmBlock : Stm { [$1] }                                 --yes
+         | StmBlock Stm { $1 ++ [$2] }                  --yes
 
 Exp : num { Num $1 }                                    --yes
     | id { Var $1 }                                     --yes
