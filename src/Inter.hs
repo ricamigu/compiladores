@@ -10,7 +10,6 @@ import Data.Map (Map)
 
 data Instr = MOVE Temp Temp                        -- temp1 := temp2
            | MOVEI Temp Int                        -- temp1 := num
-           | MOVEB Temp Bool                       -- temp1 := bool ?
            | MOVES Temp String
            | OP BinOp Temp Temp Temp               -- temp1 := temp2 op temp3
            | OPI BinOp Temp Temp Int               -- temp1 := temp2 op num
