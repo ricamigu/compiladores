@@ -200,8 +200,9 @@ transFuncRunthrough (MainFunc stms) tabl
 transFuncStart :: [Func] -> Table -> State Count [FunIR]
 transFuncStart [] tabl = return []
 transFuncStart (x:xs) tabl = case x of
-                             (InitFunc _ id fassign stms rtstm) -> do code0 <- transFuncRunthrough x tabl
-                                                                      code1 <- transFuncStart xs tabl
+                             (InitFunc _ id fassign stms rtstm) -> do tabl' <- getTable x tabl
+                                                                      code0 <- transFuncRunthrough x tabl'
+                                                                      code1 <- transFuncStart xs tabl'
                                                                       return ([code0] ++ code1)
 
                              (InitFuncE _ id fassign rtstm) -> do code0 <- transFuncRunthrough x tabl
@@ -211,3 +212,31 @@ transFuncStart (x:xs) tabl = case x of
                              (MainFunc stms) -> do code0 <- transFuncRunthrough x tabl
                                                    code1 <- transFuncStart xs tabl
                                                    return ([code0] ++ code1)
+
+getTable :: Func -> Table -> State Count Table
+getTable (InitFunc _ _ fassign stms _) tabl
+          = do tabl' <- getFuncAssignTable fassign tabl
+               tabl'' <- getFuncTable stms tabl'
+               return (tabl'')
+
+getFuncAssignTable:: [FuncAssign] -> Table -> State Count Table
+getFuncAssignTable [] tabl = return tabl
+getFuncAssignTable (x:xs) tabl = case x of
+                                    (FuncAssign tp var) -> do tabl' <- insertVarFunc tabl var
+                                                              tabl'' <- getFuncAssignTable xs tabl'
+                                                              return (tabl'')
+
+getFuncTable:: [Stm] -> Table -> State Count Table
+getFuncTable [] tabl = return tabl
+getFuncTable (x:xs) tabl = case x of
+                              (Init tp var) -> do tabl' <- insertVarFunc tabl var
+                                                  tabl'' <- getFuncTable xs tabl'
+                                                  return (tabl'') 
+                              (InitAssign tp var _) -> do tabl' <- insertVarFunc tabl var
+                                                          tabl'' <- getFuncTable xs tabl'
+                                                          return (tabl'') 
+
+insertVarFunc :: Table -> String -> State Count Table
+insertVarFunc tabl x = do temp <- newTemp
+                          return (Map.insert x temp tabl)
+                                                          
