@@ -197,11 +197,6 @@ transFuncRunthrough (MainFunc stms) tabl
                   = do code <- (transStmBlock (Block stms)) tabl
                        return (FunMain code)
 
-{-
-Start : Func { [$1] }
-      | Start Func { $1 ++ [$2] }
--}
-
 transFuncStart :: [Func] -> Table -> State Count [FunIR]
 transFuncStart [] tabl = return []
 transFuncStart (x:xs) tabl = case x of
