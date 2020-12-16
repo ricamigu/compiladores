@@ -50,7 +50,8 @@ newLabel = do(temps,labels)<-get
 
 transExp :: Exp -> Table -> Temp -> State Count [Instr]
 transExp (Num n) tabl dest     = return [MOVEI dest n]    -- int
-transExp (Boolean b) tabl dest = return [MOVEB dest b]    -- bool
+transExp (Boolean True) tabl dest = return [MOVEI dest 1] -- bool True
+transExp (Boolean False) tabl dest = return [MOVEI dest 0]-- bool False
 transExp (Text s) tabl dest    = return [MOVES dest s]    -- strings
 transExp (Var x) tabl dest                                -- var 
    = do temp <- newTemp
@@ -205,12 +206,14 @@ transFuncStart (x:xs) tabl = case x of
                                                                       code1 <- transFuncStart xs tabl'
                                                                       return ([code0] ++ code1)
 
-                             (InitFuncE _ id fassign rtstm) -> do code0 <- transFuncRunthrough x tabl
-                                                                  code1 <- transFuncStart xs tabl
+                             (InitFuncE _ id fassign rtstm) -> do tabl' <- getTable x tabl
+                                                                  code0 <- transFuncRunthrough x tabl'
+                                                                  code1 <- transFuncStart xs tabl'
                                                                   return ([code0] ++ code1)
 
-                             (MainFunc stms) -> do code0 <- transFuncRunthrough x tabl
-                                                   code1 <- transFuncStart xs tabl
+                             (MainFunc stms) -> do tabl' <- getTable x tabl
+                                                   code0 <- transFuncRunthrough x tabl'
+                                                   code1 <- transFuncStart xs tabl'
                                                    return ([code0] ++ code1)
 
 getTable :: Func -> Table -> State Count Table
@@ -218,6 +221,15 @@ getTable (InitFunc _ _ fassign stms _) tabl
           = do tabl' <- getFuncAssignTable fassign tabl
                tabl'' <- getFuncTable stms tabl'
                return (tabl'')
+
+getTable (InitFuncE _ _ fassign _) tabl
+          = do tabl' <- getFuncAssignTable fassign tabl
+               return (tabl')
+
+getTable (MainFunc stms) tabl
+          = do tabl' <- getFuncTable stms tabl
+               return (tabl')          
+           
 
 getFuncAssignTable:: [FuncAssign] -> Table -> State Count Table
 getFuncAssignTable [] tabl = return tabl
@@ -235,6 +247,19 @@ getFuncTable (x:xs) tabl = case x of
                               (InitAssign tp var _) -> do tabl' <- insertVarFunc tabl var
                                                           tabl'' <- getFuncTable xs tabl'
                                                           return (tabl'') 
+                              (Assign var _) -> do tabl' <- insertVarFunc tabl var
+                                                   tabl'' <- getFuncTable xs tabl'
+                                                   return (tabl'') 
+                              (If _ (Block stm1) (Block stm2)) -> do tabl' <- getFuncTable stm1 tabl
+                                                                     tabl'' <- getFuncTable stm2 tabl'
+                                                                     return (tabl'')
+                              (If _ (Block stm1) Skip) -> do tabl' <- getFuncTable stm1 tabl
+                                                             return (tabl')
+                              (While _ (Block stm1)) -> do tabl' <- getFuncTable stm1 tabl
+                                                           return (tabl')
+                              (For (Block stm1) _ _ (Block stm2)) -> do tabl' <- getFuncTable stm1 tabl
+                                                                        tabl'' <- getFuncTable stm2 tabl'
+                                                                        return (tabl'')
 
 insertVarFunc :: Table -> String -> State Count Table
 insertVarFunc tabl x = do temp <- newTemp
